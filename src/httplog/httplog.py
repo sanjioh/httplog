@@ -134,6 +134,39 @@ class StatsObserver(ThreadManager):
             self._sections[section] = self._sections.setdefault(section, 0) + 1
 
 
+class AlertObserver(ThreadManager):
+    def __init__(self, threshold, lock=None):
+        self._threshold = threshold
+        self._lock = lock or threading.Lock()
+        self._count = self._prev_count = 0
+        self._threshold_passed = False
+
+    def _run(self):
+        while not self._closing.is_set():
+            with self._lock:
+                if (
+                    self._count - self._prev_count >= self._threshold
+                    and not self._threshold_passed
+                ):
+                    print('high traffic')  # TODO: add time
+                    self._threshold_passed = True
+
+                if (
+                    self._count - self._prev_count < self._threshold
+                    and self._threshold_passed
+                ):
+                    print('low traffic')  # TODO: add time
+                    self._threshold_passed = False
+
+                self._prev_count = self._count
+
+            self._closing.wait(120)
+
+    def update(self, record):
+        with self._lock:
+            self._count += 1
+
+
 def main():
 
     so = StatsObserver()
