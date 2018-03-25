@@ -1,20 +1,38 @@
+def _human_bytes(num, suffix='B'):
+    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
+        if abs(num) < 1024.0:
+            return '{:.1f} {}{}'.format(num, unit, suffix)
+        num /= 1024.0
+    return '{:.1f} {}{}'.format(num, 'Yi', suffix)
+
+
 class StatsFormatter:
-    _format_string = '{}. {} ({})'
+    _format_string = '  {}. {} ({})'
     _titles = [
-        'Users Top 5',
-        'Hosts Top 5',
-        'Sections Top 5',
+        'Top 5 users',
+        'Top 5 hosts',
+        'Top 5 sections',
     ]
 
-    def format(self, rankings, transferred_bytes, record_count, record_rate):
+    def format(self, rankings, bytes_transferred, record_count, record_rate):
         users, hosts, sections = rankings
-        for tr in zip(self._titles, rankings):
-            title, ranking = tr
-            print(title)
-            for idx, item in enumerate(ranking):
-                print(self._format_string.format(idx+1, *item))
-        print(f'Total records processed: {record_count} '
-              f'({record_rate} records/s)')
-        transferred_megabytes = int(transferred_bytes / (1024 * 1024))
-        print(f'Transferred bytes: {transferred_bytes} '
-              f'({transferred_megabytes} MB)')
+        banner_start = '========== STATS START ========='
+        boards = []
+        for title, ranking in zip(self._titles, rankings):
+            rows = '\n'.join([self._format_string.format(idx+1, *item)
+                              for idx, item in enumerate(ranking)])
+            board = f'{title}\n{rows}'.format(title, rows)
+            boards.append(board)
+        boards = '\n\n'.join(boards)
+        total_records = (f'Total records processed: {record_count} '
+                         f'({record_rate} records/s)')
+        total_bytes = (f'Total bytes transferred: {bytes_transferred} '
+                       f'({_human_bytes(bytes_transferred)})')
+        banner_end = '========== STATS END ========='
+        return (
+            f'{banner_start}\n'
+            f'{boards}\n\n'
+            f'{total_records}\n'
+            f'{total_bytes}\n'
+            f'{banner_end}'
+        )
