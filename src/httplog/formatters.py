@@ -6,17 +6,26 @@ def _human_bytes(num, suffix='B'):
     return '{:.1f} {}{}'.format(num, 'Yi', suffix)
 
 
+def _green(s):
+    return f'\033[92m{s}\033[0m'
+
+
+def _red(s):
+    return f'\033[91m{s}\033[0m'
+
+
 class StatsFormatter:
+    _banner_start = f"{20*'='} STATS {20*'='}"
     _format_string = '  {}. {} ({})'
     _titles = [
         'Top 5 users',
         'Top 5 hosts',
         'Top 5 sections',
     ]
+    _banner_end = ''
 
     def format(self, rankings, bytes_transferred, record_count, record_rate):
         users, hosts, sections = rankings
-        banner_start = '========== STATS START ========='
         boards = []
         for title, ranking in zip(self._titles, rankings):
             rows = '\n'.join([self._format_string.format(idx+1, *item)
@@ -25,16 +34,15 @@ class StatsFormatter:
             boards.append(board)
         boards = '\n\n'.join(boards)
         total_records = (f'Total records processed: {record_count} '
-                         f'({record_rate} records/s)')
+                         f'({record_rate} records/s avg)')
         total_bytes = (f'Total bytes transferred: {bytes_transferred} '
                        f'({_human_bytes(bytes_transferred)})')
-        banner_end = '========== STATS END ========='
         return (
-            f'{banner_start}\n'
+            f'{self._banner_start}\n'
             f'{boards}\n\n'
             f'{total_records}\n'
             f'{total_bytes}\n'
-            f'{banner_end}'
+            f'{self._banner_end}'
         )
 
 
