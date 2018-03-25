@@ -1,14 +1,17 @@
+import sys
 import threading
 import time
+from datetime import datetime
 
-from .formatters import StatsFormatter
+from .formatters import AlertFormatter, StatsFormatter
 from .thread_controller import ThreadController
 
 
 class StatsObserver(ThreadController):
     _interval = 10   # TODO 10 secs
 
-    def __init__(self, *, formatter=None, lock=None, clock=None):
+    def __init__(self, *, fd=None, formatter=None, lock=None, clock=None):
+        self._fd = fd or sys.stdout
         self._formatter = formatter or StatsFormatter()
         self._lock = lock or threading.Lock()
         self._clock = clock or time
@@ -33,12 +36,15 @@ class StatsObserver(ThreadController):
                 )
 
                 if self._record_count > 0:
-                    print(self._formatter.format(
-                        rankings,
-                        self._bytes_transferred,
-                        self._record_count,
-                        record_rate,
-                    ))
+                    print(
+                        self._formatter.format(
+                            rankings,
+                            self._bytes_transferred,
+                            self._record_count,
+                            record_rate,
+                        ),
+                        file=self._fd,
+                    )
 
             self._closing.wait(self._interval)
 
@@ -55,10 +61,13 @@ class StatsObserver(ThreadController):
 
 
 class AlertObserver(ThreadController):
-    _interval = 10  # TODO 2 min
+    _interval = 120  # TODO 2 min
 
-    def __init__(self, threshold, *, lock=None):  # TODO: fix kw-only args on everything
+    # TODO: fix kw-only args on everything
+    def __init__(self, threshold, *, fd=None, formatter=None, lock=None):
         self._threshold = threshold * self._interval
+        self._fd = fd or sys.stdout
+        self._formatter = formatter or AlertFormatter()
         self._lock = lock or threading.Lock()
         self._count = 0
         self._threshold_passed = False
@@ -67,18 +76,33 @@ class AlertObserver(ThreadController):
     def _run(self):
         while not self._closing.is_set():
             with self._lock:
+                now = datetime.now()
                 if (
                     self._count >= self._threshold
                     and not self._threshold_passed
                 ):
-                    print('high traffic')  # TODO: add time, replace with formatter
+                    print(
+                        self._formatter.format_high(
+                            self._count,
+                            self._interval,
+                            now,
+                        ),
+                        file=self._fd,
+                    )
                     self._threshold_passed = True
 
                 if (
                     self._count < self._threshold
                     and self._threshold_passed
                 ):
-                    print('low traffic')  # TODO: add time, replace with formatter
+                    print(
+                        self._formatter.format_low(
+                            self._count,
+                            self._interval,
+                            now,
+                        ),
+                        file=self._fd,
+                    )
                     self._threshold_passed = False
 
                 self._count = 0
