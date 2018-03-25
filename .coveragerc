@@ -1,0 +1,10 @@
+[run]
+branch = True
+
+[paths]
+app_path =
+    src/httplog
+    .tox/*/lib/python*/site-packages/httplog
+
+[report]
+show_missing = True
