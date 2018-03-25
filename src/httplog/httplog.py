@@ -41,7 +41,7 @@ def main():
     fr = FileReader(fd, observers=[so, ao])
 
     def sighandler(signum, frame):
-        print('Shutting down...')
+        print('\nShutting down...')
         so.stop()
         ao.stop()
         fr.stop()
