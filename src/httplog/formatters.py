@@ -36,3 +36,33 @@ class StatsFormatter:
             f'{total_bytes}\n'
             f'{banner_end}'
         )
+
+
+class AlertFormatter:
+    _banner_start = f"{20*'='} ALERT {20*'='}"
+    _time_format = '%Y-%m-%d %H:%M:%S'
+    _format_strings = {
+        'high': ('High traffic generated an alert - hits = {}\n'
+                 '({} reqs/s avg over the last {}s)\n'
+                 'Triggered at {}'),
+        'low': ('Traffic is back to normal - hits = {}\n'
+                '({} reqs/s avg over the last {}s)\n'
+                'Recovered at {}'),
+    }
+    _banner_end = ''
+
+    def _format(self, alert, count, interval, datetime):
+        avg = round(count / interval)
+        info = self._format_strings[alert].format(
+            count, avg, interval, datetime.strftime(self._time_format))
+        return (
+            f'{self._banner_start}\n'
+            f'{info}\n'
+            f'{self._banner_end}'
+        )
+
+    def format_low(self, count, interval, datetime):
+        return _green(self._format('low', count, interval, datetime))
+
+    def format_high(self, count, interval, datetime):
+        return _red(self._format('high', count, interval, datetime))
