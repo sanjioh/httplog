@@ -2,6 +2,7 @@
 import argparse
 import signal
 import sys
+import threading
 
 from .file_reader import FileReader
 from .observers import AlertObserver, StatsObserver
@@ -27,8 +28,6 @@ def _cli():
 
 def main():
     """Program entry point."""
-    so = StatsObserver()
-    ao = AlertObserver(10)
     filename, threshold = _cli()
 
     try:
@@ -36,6 +35,9 @@ def main():
     except OSError as e:
         sys.exit(f'File "{filename}" cannot be opened ({e.strerror}).')
 
+    lock = threading.Lock()
+    so = StatsObserver(lock=lock)
+    ao = AlertObserver(threshold, lock=lock)
     fr = FileReader(fd, observers=[so, ao])
 
     def sighandler(signum, frame):
