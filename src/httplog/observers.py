@@ -10,7 +10,8 @@ from .thread_controller import ThreadController
 class StatsObserver(ThreadController):
     _interval = 10   # TODO 10 secs
 
-    def __init__(self, *, fd=None, formatter=None, lock=None, clock=None):
+    def __init__(self, *, fd=None, formatter=None, lock=None, clock=None,
+                 event=None):
         self._fd = fd or sys.stdout
         self._formatter = formatter or StatsFormatter()
         self._lock = lock or threading.Lock()
@@ -21,7 +22,7 @@ class StatsObserver(ThreadController):
         self._record_count = 0
         self._bytes_transferred = 0
         self._start_time = self._clock.time()
-        super().__init__()
+        super().__init__(event)
 
     def _run(self):
         while not self._closing.is_set():
@@ -64,23 +65,27 @@ class AlertObserver(ThreadController):
     _interval = 120  # TODO 2 min
 
     # TODO: fix kw-only args on everything
-    def __init__(self, threshold, *, fd=None, formatter=None, lock=None):
+    def __init__(self, threshold, *, fd=None, formatter=None, lock=None,
+                 event=None):
         self._threshold = threshold * self._interval
         self._fd = fd or sys.stdout
         self._formatter = formatter or AlertFormatter()
         self._lock = lock or threading.Lock()
         self._count = 0
         self._threshold_passed = False
-        super().__init__()
+        super().__init__(event)
 
     def _run(self):
+        print('enter _run')
         while not self._closing.is_set():
+            print('is_set is False')
             with self._lock:
                 now = datetime.now()
                 if (
                     self._count >= self._threshold
                     and not self._threshold_passed
                 ):
+                    print('HIGH')
                     print(
                         self._formatter.format_high(
                             self._count,
@@ -95,6 +100,7 @@ class AlertObserver(ThreadController):
                     self._count < self._threshold
                     and self._threshold_passed
                 ):
+                    print('LOW')
                     print(
                         self._formatter.format_low(
                             self._count,
@@ -107,7 +113,10 @@ class AlertObserver(ThreadController):
 
                 self._count = 0
 
+            print('start waiting')
             self._closing.wait(self._interval)
+            print('wait unlocked')
+        print('exiting')
 
     def update(self, record):
         with self._lock:

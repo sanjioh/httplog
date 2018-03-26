@@ -2,9 +2,9 @@ import threading
 
 
 class ThreadController:
-    def __init__(self):
+    def __init__(self, event):
         self._thread = None
-        self._closing = threading.Event()
+        self._closing = event
 
     def start(self):
         if self._thread is None and not self._closing.is_set():
