@@ -76,16 +76,13 @@ class AlertObserver(ThreadController):
         super().__init__(event)
 
     def _run(self):
-        print('enter _run')
         while not self._closing.is_set():
-            print('is_set is False')
             with self._lock:
                 now = datetime.now()
                 if (
                     self._count >= self._threshold
                     and not self._threshold_passed
                 ):
-                    print('HIGH')
                     print(
                         self._formatter.format_high(
                             self._count,
@@ -100,7 +97,6 @@ class AlertObserver(ThreadController):
                     self._count < self._threshold
                     and self._threshold_passed
                 ):
-                    print('LOW')
                     print(
                         self._formatter.format_low(
                             self._count,
@@ -113,10 +109,7 @@ class AlertObserver(ThreadController):
 
                 self._count = 0
 
-            print('start waiting')
             self._closing.wait(self._interval)
-            print('wait unlocked')
-        print('exiting')
 
     def update(self, record):
         with self._lock:
