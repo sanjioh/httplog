@@ -1,3 +1,11 @@
+"""
+Formatters module.
+
+This module includes classes that can be used to
+properly format strings to be showed on the terminal.
+"""
+
+
 def _human_bytes(num, suffix='B'):
     for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
         if abs(num) < 1024.0:
@@ -15,6 +23,8 @@ def _red(s):
 
 
 class StatsFormatter:
+    """Format statistics about log records."""
+
     _banner_start = f"{20*'='} STATS {20*'='}"
     _format_string = '  {}. {} ({})'
     _titles = [
@@ -25,6 +35,7 @@ class StatsFormatter:
     _banner_end = ''
 
     def format(self, rankings, bytes_transferred, record_count, record_rate):
+        """Build a visually appealing representation of log file statistics."""
         users, hosts, sections = rankings
         boards = []
         for title, ranking in zip(self._titles, rankings):
@@ -47,6 +58,8 @@ class StatsFormatter:
 
 
 class AlertFormatter:
+    """Format alert messages for 'triggered/recovered alarm' events."""
+
     _banner_start = f"{20*'='} ALERT {20*'='}"
     _time_format = '%Y-%m-%d %H:%M:%S'
     _format_strings = {
@@ -70,7 +83,9 @@ class AlertFormatter:
         )
 
     def format_low(self, count, interval, datetime):
+        """Build 'alarm recovered' alert message."""
         return _green(self._format('low', count, interval, datetime))
 
     def format_high(self, count, interval, datetime):
+        """Build 'alarm triggered' alert message."""
         return _red(self._format('high', count, interval, datetime))

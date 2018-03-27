@@ -1,3 +1,10 @@
+"""
+Observers module.
+
+Observers are objects which listen to streams of events and act
+accordingly. In our case, observers receive log records
+and perform different actions depending on their role.
+"""
 import sys
 import threading
 import time
@@ -8,10 +15,20 @@ from .thread_controller import ThreadController
 
 
 class StatsObserver(ThreadController):
+    """
+    Print log file statistics to the terminal.
+
+    This class keeps track of useful statistics about log records, and
+    prints them to the terminal at regular intervals.
+
+    Execution is performed asynchronously using a child thread.
+    """
+
     _interval = 10   # TODO 10 secs
 
     def __init__(self, *, fd=None, formatter=None, lock=None, clock=None,
                  event=None):
+        """Initialize a StatsObserver object."""
         self._fd = fd or sys.stdout
         self._formatter = formatter or StatsFormatter()
         self._lock = lock or threading.Lock()
@@ -50,6 +67,7 @@ class StatsObserver(ThreadController):
             self._closing.wait(self._interval)
 
     def update(self, record):
+        """Receive notifications of new log records."""
         with self._lock:
             self._record_count += 1
             self._bytes_transferred += record.size
@@ -62,11 +80,23 @@ class StatsObserver(ThreadController):
 
 
 class AlertObserver(ThreadController):
+    """
+    Print triggered/recovered alarm alerts to the terminal.
+
+    This class keeps track of the rate log records appear in the log file
+    and prints a warning to the terminal if it goes beyond a user-defined
+    threshold. When the rate comes back to normal, a recovery message is shown
+    to notify the event.
+
+    Execution is performed asynchronously using a child thread.
+    """
+
     _interval = 120  # TODO 2 min
 
     # TODO: fix kw-only args on everything
     def __init__(self, threshold, *, fd=None, formatter=None, lock=None,
                  event=None):
+        """Initialize an AlertObserver object."""
         self._threshold = threshold * self._interval
         self._fd = fd or sys.stdout
         self._formatter = formatter or AlertFormatter()
@@ -112,5 +142,6 @@ class AlertObserver(ThreadController):
             self._closing.wait(self._interval)
 
     def update(self, record):
+        """Receive notifications of new log records."""
         with self._lock:
             self._count += 1
