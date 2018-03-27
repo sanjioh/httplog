@@ -24,7 +24,7 @@ class StatsObserver(ThreadController):
     Execution is performed asynchronously using a child thread.
     """
 
-    _interval = 10   # TODO 10 secs
+    _interval = 10
 
     def __init__(self, *, fd=None, formatter=None, lock=None, clock=None,
                  event=None):
@@ -91,9 +91,8 @@ class AlertObserver(ThreadController):
     Execution is performed asynchronously using a child thread.
     """
 
-    _interval = 120  # TODO 2 min
+    _interval = 120
 
-    # TODO: fix kw-only args on everything
     def __init__(self, threshold, *, fd=None, formatter=None, lock=None,
                  event=None):
         """Initialize an AlertObserver object."""
