@@ -21,12 +21,12 @@ class FileReader(ThreadController):
     Execution is performed asynchronously using a child thread.
     """
 
-    def __init__(self, fd, *, parser=None, observers=None):
+    def __init__(self, fd, *, parser=None, observers=None, event=None):
         """Initialize a FileReader object."""
         self._fd = fd
         self._parser = parser or LogRecord
         self._observers = observers or []
-        super().__init__()
+        super().__init__(event)
 
     def _tail(self):
         self._fd.seek(0, 2)

@@ -11,10 +11,10 @@ import threading
 class ThreadController:
     """Start and stop a child thread gracefully."""
 
-    def __init__(self, event):
+    def __init__(self, event=None):
         """Initialize a ThreadController object."""
         self._thread = None
-        self._closing = event
+        self._closing = event or threading.Event()
 
     def start(self):
         """
