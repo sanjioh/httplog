@@ -26,7 +26,7 @@ class StatsFormatter:
     """Format statistics about log records."""
 
     _banner_start = f"{20*'='} STATS {20*'='}"
-    _format_string = '  {}. {} ({})'
+    _row = '  {}. {} ({})'
     _titles = [
         'Top 5 users',
         'Top 5 hosts',
@@ -41,7 +41,7 @@ class StatsFormatter:
         users, hosts, sections = rankings
         boards = []
         for title, ranking in zip(self._titles, rankings):
-            rows = '\n'.join([self._format_string.format(idx+1, *item)
+            rows = '\n'.join([self._row.format(idx+1, *item)
                               for idx, item in enumerate(ranking)])
             board = f'{title}\n{rows}'.format(title, rows)
             boards.append(board)
@@ -64,7 +64,7 @@ class AlertFormatter:
 
     _banner_start = f"{20*'='} ALERT {20*'='}"
     _time_format = '%Y-%m-%d %H:%M:%S'
-    _format_strings = {
+    _alerts = {
         'high': ('High traffic generated an alert - hits = {}\n'
                  '({:.1f} reqs/s avg over the last {}s)\n'
                  'Triggered at {}'),
@@ -76,11 +76,11 @@ class AlertFormatter:
 
     def _format(self, alert, count, interval, datetime):
         avg = count / interval
-        info = self._format_strings[alert].format(
+        message = self._alerts[alert].format(
             count, avg, interval, datetime.strftime(self._time_format))
         return (
             f'{self._banner_start}\n'
-            f'{info}\n'
+            f'{message}\n'
             f'{self._banner_end}'
         )
 
