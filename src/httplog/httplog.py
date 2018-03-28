@@ -23,6 +23,8 @@ def _cli():
         help='Alert threshold (requests/s).',
     )
     args = parser.parse_args()
+    if args.threshold <= 0:
+        raise parser.error('Threshold must be positive.')
     return args.filename, args.threshold
 
 
