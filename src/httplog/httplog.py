@@ -20,7 +20,7 @@ def _cli():
         '--threshold', '-t',
         type=int,
         default=100,
-        help='Alert threshold (requests/s)',
+        help='Alert threshold (requests/s).',
     )
     args = parser.parse_args()
     return args.filename, args.threshold
