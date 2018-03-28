@@ -43,7 +43,7 @@ class StatsFormatter:
         for title, ranking in zip(self._titles, rankings):
             rows = '\n'.join([self._row.format(idx+1, *item)
                               for idx, item in enumerate(ranking)])
-            board = f'{title}\n{rows}'.format(title, rows)
+            board = f'{title}\n{rows}'
             boards.append(board)
         boards = '\n\n'.join(boards)
         total_records = self._total_records.format(record_count, record_rate)
