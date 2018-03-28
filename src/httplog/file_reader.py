@@ -12,7 +12,7 @@ class FileReader(ThreadController):
     """
     Read the log file and update the observers with LogRecord objects.
 
-    This class is responsible for reading an actively written log file,
+    This class is responsible for reading an actively written-to log file,
     building LogRecord objects out of every single line, and updating
     the observers with those objects.
     The read operation goes from the end of the file onwards (same behaviour
