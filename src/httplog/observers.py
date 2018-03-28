@@ -48,9 +48,9 @@ class StatsObserver(ThreadController):
                     sorted(counter.items(), key=lambda x: x[1])[:-6:-1]
                     for counter in (self._users, self._hosts, self._sections)
                 ]
-                record_rate = round(
+                record_rate = (
                     self._record_count
-                    / (self._clock.time() - self._start_time),
+                    / (self._clock.time() - self._start_time)
                 )
 
                 if self._record_count > 0:

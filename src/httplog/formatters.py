@@ -73,7 +73,7 @@ class AlertFormatter:
     _banner_end = ''
 
     def _format(self, alert, count, interval, datetime):
-        avg = round(count / interval)
+        avg = count / interval
         info = self._format_strings[alert].format(
             count, avg, interval, datetime.strftime(self._time_format))
         return (
