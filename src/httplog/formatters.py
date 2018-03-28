@@ -32,6 +32,8 @@ class StatsFormatter:
         'Top 5 hosts',
         'Top 5 sections',
     ]
+    _total_records = 'Total records processed: {} ({:.1f} records/s avg)'
+    _total_bytes = 'Total bytes transferred: {} ({})'
     _banner_end = ''
 
     def format(self, rankings, bytes_transferred, record_count, record_rate):
@@ -44,10 +46,10 @@ class StatsFormatter:
             board = f'{title}\n{rows}'.format(title, rows)
             boards.append(board)
         boards = '\n\n'.join(boards)
-        total_records = (f'Total records processed: {record_count} '
-                         f'({record_rate} records/s avg)')
-        total_bytes = (f'Total bytes transferred: {bytes_transferred} '
-                       f'({_human_bytes(bytes_transferred)})')
+        total_records = self._total_records.format(record_count, record_rate)
+        total_bytes = self._total_bytes.format(
+            bytes_transferred, _human_bytes(bytes_transferred))
+
         return (
             f'{self._banner_start}\n'
             f'{boards}\n\n'
@@ -64,10 +66,10 @@ class AlertFormatter:
     _time_format = '%Y-%m-%d %H:%M:%S'
     _format_strings = {
         'high': ('High traffic generated an alert - hits = {}\n'
-                 '({} reqs/s avg over the last {}s)\n'
+                 '({:.1f} reqs/s avg over the last {}s)\n'
                  'Triggered at {}'),
         'low': ('Traffic is back to normal - hits = {}\n'
-                '({} reqs/s avg over the last {}s)\n'
+                '({:.1f} reqs/s avg over the last {}s)\n'
                 'Recovered at {}'),
     }
     _banner_end = ''
